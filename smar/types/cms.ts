@@ -1,21 +1,41 @@
 /**
  * FILE: types/cms.ts
  * Trung tâm định nghĩa kiểu dữ liệu cho toàn bộ CMS
- * Chuẩn CMS-driven – Type-safe – Mở rộng dài hạn
+ * Chuẩn enterprise – type-safe – scale được
  */
-import { ChangeEvent } from "react";
 
+import { ChangeEvent } from "react";
+import type { IconName } from "@/lib/iconRegistry";
+
+/* =====================================================
+   GENERIC CMS SECTION PROPS
+===================================================== */
+
+/**
+ * Upload handler dùng chung cho toàn bộ CMS
+ * field được ràng buộc theo keyof Section
+ */
+export type CmsUploadHandler<T> = (
+  e: ChangeEvent<HTMLInputElement>,
+  field: keyof T
+) => Promise<void>;
+
+/**
+ * Props chuẩn cho mọi Section Config trong Admin
+ */
 export interface CmsSectionProps<T> {
-  data: T;
+  data?: T;
   updateData: (data: T) => void;
-  onUpload?: (e: ChangeEvent<HTMLInputElement>) => void;
+
+  // Upload media (image / video / file)
+  onUpload?: CmsUploadHandler<T>;
   uploading?: boolean;
 }
-import type { IconName } from "@/lib/iconRegistry";
 
 /* =====================================================
    HERO SECTION
 ===================================================== */
+
 export interface HeroButton {
   label: string;
   href: string;
@@ -34,8 +54,9 @@ export interface HeroSection {
 /* =====================================================
    ABOUT SECTION
 ===================================================== */
+
 export interface AboutReason {
-  icon_name: IconName;     // 🔥 dùng chung registry
+  icon_name: IconName;
   title: string;
   desc: string;
 }
@@ -49,12 +70,13 @@ export interface AboutSection {
 /* =====================================================
    SKU SECTION
 ===================================================== */
+
 export interface SKUItem {
   title: string;
   subtitle: string;
   price: string;
   tag: string;
-  icon_name: IconName;     // 🔥 không còn icon string tự do
+  icon_name: IconName;
   isBestSeller?: boolean;
   features: string[];
 }
@@ -72,6 +94,7 @@ export interface SKUSection {
 /* =====================================================
    STATS SECTION
 ===================================================== */
+
 export interface StatItem {
   id: string;
   value: string;
@@ -90,6 +113,7 @@ export interface StatsSection {
 /* =====================================================
    TESTIMONIALS SECTION
 ===================================================== */
+
 export interface TestimonialItem {
   id: string;
   author_name: string;
@@ -103,7 +127,7 @@ export interface CommitmentItem {
   id: string;
   title: string;
   desc: string;
-  icon_name: IconName;     // 🔥 CMS-driven icon
+  icon_name: IconName;
 }
 
 export interface TestimonialsSection {
@@ -112,10 +136,9 @@ export interface TestimonialsSection {
 }
 
 /* =====================================================
-   CONTACT SECTION
+   CONTACT SECTION (NÂNG CAO – MEDIA + MAP)
 ===================================================== */
-// --- CONTACT SECTION TYPES ---
-// types/cms.ts
+
 export interface ContactSection {
   title?: string;
   description?: string;
@@ -124,21 +147,24 @@ export interface ContactSection {
   phone?: string;
   address?: string;
 
+  // Google Map
   google_map_url?: string;
   google_map_embed?: string;
 
+  // Media
   office_image_url?: string;
   office_video_url?: string;
 
+  // Form
   services?: string[];
-
   cta_label?: string;
   privacy_note?: string;
 }
 
 /* =====================================================
-   MAIN SITE DATA (GLOBAL CMS STATE)
+   GLOBAL CMS STATE
 ===================================================== */
+
 export interface SiteData {
   hero: HeroSection;
   about: AboutSection;
@@ -147,3 +173,8 @@ export interface SiteData {
   testimonials: TestimonialsSection;
   contact: ContactSection;
 }
+
+/**
+ * Key dùng cho CMS Tabs / Router
+ */
+export type CmsTabKey = keyof SiteData;

@@ -1,113 +1,131 @@
 "use client";
 
+import Image from "next/image";
 import {
-  Type,
-  AlignLeft,
-  Mail,
-  Phone,
-  MapPin,
-  Image,
-  Video,
-  Link as LinkIcon,
-  Plus,
-  Trash2
+  Type, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Image as ImageIcon,
+  Video, 
+  Link as LinkIcon, 
+  Plus, 
+  Trash2, 
+  Lock, 
+  MousePointer2, 
+  LucideIcon, 
+  PlusCircle,
+  AlignLeft
 } from "lucide-react";
-import { ContactSection } from "@/types/cms";
-
-interface ContactConfigProps {
-  data?: ContactSection;
-  updateData: (data: ContactSection) => void;
-}
-
-const DEFAULT_DATA: ContactSection = {
-  title: "",
-  description: "",
-  email: "",
-  phone: "",
-  address: "",
-  google_map_url: "",
-  google_map_embed: "",
-  office_image_url: "",
-  office_video_url: "",
-  services: [],
-  cta_label: "Đăng Ký Tư Vấn Ngay",
-  privacy_note: "Cam kết bảo mật thông tin khách hàng 100%"
-};
+import { ContactSection, CmsSectionProps } from "@/types/cms";
 
 export default function ContactConfig({
-  data = DEFAULT_DATA,
-  updateData
-}: ContactConfigProps) {
-  const d = { ...DEFAULT_DATA, ...data };
+  data,
+  updateData,
+  uploading = false,
+  onUpload,
+}: CmsSectionProps<ContactSection>) {
+  
+  const d = data || {};
 
   return (
-    <div className="space-y-12 pb-32 animate-in fade-in duration-500">
+    <div className="space-y-12 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-      {/* TEXT CONTENT */}
+      {/* 1. NỘI DUNG DẪN DẮT */}
       <Block title="Nội dung dẫn dắt" icon={Type}>
         <Input
-          label="Tiêu đề chính"
-          value={d.title}
+          label="Tiêu đề chính (Section Title)"
+          value={d.title || ""}
           onChange={(v) => updateData({ ...d, title: v })}
           highlight
         />
         <Textarea
-          label="Mô tả"
-          value={d.description}
+          label="Mô tả ngắn"
+          value={d.description || ""}
           onChange={(v) => updateData({ ...d, description: v })}
         />
       </Block>
 
-      {/* CONTACT INFO */}
-      <Block title="Thông tin liên hệ" icon={Mail}>
-        <Grid>
-          <Input icon={Mail} label="Email" value={d.email} onChange={(v) => updateData({ ...d, email: v })} />
-          <Input icon={Phone} label="Hotline" value={d.phone} onChange={(v) => updateData({ ...d, phone: v })} />
-          <Input icon={MapPin} label="Địa chỉ" value={d.address} onChange={(v) => updateData({ ...d, address: v })} />
-        </Grid>
+      {/* 2. MEDIA THỰC TẾ (UPLOAD ĐỘNG) */}
+      <Block title="Hình ảnh / Video văn phòng" icon={ImageIcon}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* UPLOAD ẢNH */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Ảnh văn phòng</label>
+            <div className="relative aspect-video bg-gray-50 rounded-3xl overflow-hidden border-2 border-dashed border-gray-100 group flex items-center justify-center">
+              {d.office_image_url ? (
+                <Image 
+                  src={d.office_image_url} 
+                  alt="Office" 
+                  fill 
+                  className="object-cover transition-transform duration-500 group-hover:scale-110" 
+                />
+              ) : (
+                <div className="text-gray-300 flex flex-col items-center gap-2">
+                  <ImageIcon size={32} />
+                  <span className="text-[9px] font-bold uppercase">Chưa có ảnh</span>
+                </div>
+              )}
+              <label className="absolute inset-0 bg-[#002D72]/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer z-20 gap-2">
+                <PlusCircle size={32} />
+                <span className="font-black text-[10px] tracking-widest uppercase text-center">
+                  {uploading ? "Đang tải..." : "Thay đổi ảnh"}
+                </span>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  onChange={(e) => onUpload?.(e, "office_image_url")} 
+                  accept="image/*" 
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* UPLOAD VIDEO */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Video thực tế</label>
+            <div className="relative aspect-video bg-gray-50 rounded-3xl overflow-hidden border-2 border-dashed border-gray-100 group flex items-center justify-center">
+              {d.office_video_url ? (
+                <video src={d.office_video_url} className="w-full h-full object-cover" controls />
+              ) : (
+                <div className="text-gray-300 flex flex-col items-center gap-2">
+                  <Video size={32} />
+                  <span className="text-[9px] font-bold uppercase">Chưa có video</span>
+                </div>
+              )}
+              <label className="absolute inset-0 bg-[#002D72]/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer z-20 gap-2">
+                <PlusCircle size={32} />
+                <span className="font-black text-[10px] tracking-widest uppercase text-center">
+                  {uploading ? "Đang tải..." : "Thay đổi video"}
+                </span>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  onChange={(e) => onUpload?.(e, "office_video_url")} 
+                  accept="video/*" 
+                />
+              </label>
+            </div>
+          </div>
+        </div>
       </Block>
 
-      {/* MAP */}
-      <Block title="Google Map" icon={MapPin}>
-        <Input
-          icon={LinkIcon}
-          label="Google Map URL"
-          value={d.google_map_url}
-          onChange={(v) => updateData({ ...d, google_map_url: v })}
-        />
-        <Textarea
-          label="Google Map Embed (iframe)"
-          value={d.google_map_embed}
-          onChange={(v) => updateData({ ...d, google_map_embed: v })}
-          rows={4}
-        />
+      {/* 3. THÔNG TIN LIÊN HỆ */}
+      <Block title="Thông tin kết nối" icon={Mail}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Input icon={Mail} label="Email nhận tin" value={d.email || ""} onChange={(v) => updateData({ ...d, email: v })} />
+          <Input icon={Phone} label="Hotline tư vấn" value={d.phone || ""} onChange={(v) => updateData({ ...d, phone: v })} />
+          <Input icon={MapPin} label="Địa chỉ văn phòng" value={d.address || ""} onChange={(v) => updateData({ ...d, address: v })} />
+        </div>
       </Block>
 
-      {/* MEDIA */}
-      <Block title="Hình ảnh / Video văn phòng" icon={Image}>
-        <Grid>
-          <Input
-            icon={Image}
-            label="Ảnh văn phòng (URL)"
-            value={d.office_image_url}
-            onChange={(v) => updateData({ ...d, office_image_url: v })}
-          />
-          <Input
-            icon={Video}
-            label="Video văn phòng (URL)"
-            value={d.office_video_url}
-            onChange={(v) => updateData({ ...d, office_video_url: v })}
-          />
-        </Grid>
-      </Block>
-
-      {/* SERVICES */}
-      <Block title="Danh sách dịch vụ (Dropdown)" icon={AlignLeft}>
-        <div className="space-y-3">
+      {/* 4. DỊCH VỤ DROPDOWN */}
+      <Block title="Danh mục dịch vụ (Dropdown Form)" icon={AlignLeft}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {(d.services || []).map((s, i) => (
-            <div key={i} className="flex gap-3">
+            <div key={i} className="flex gap-2 group animate-in fade-in duration-300">
               <input
-                className="flex-1 p-3 bg-gray-50 rounded-xl font-medium outline-none focus:ring-2 ring-blue-100"
+                className="flex-1 p-3 bg-gray-50 rounded-xl font-bold text-sm outline-none focus:ring-2 ring-blue-100 focus:bg-white transition-all"
                 value={s}
                 onChange={(e) => {
                   const next = [...(d.services || [])];
@@ -115,84 +133,68 @@ export default function ContactConfig({
                   updateData({ ...d, services: next });
                 }}
               />
-              <button
-                onClick={() =>
-                  updateData({
-                    ...d,
-                    services: d.services?.filter((_, idx) => idx !== i)
-                  })
-                }
-                className="p-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100"
+              <button 
+                onClick={() => updateData({ ...d, services: d.services?.filter((_, idx) => idx !== i)})} 
+                className="p-3 text-gray-300 hover:text-red-500 transition-colors"
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
               </button>
             </div>
           ))}
-          <button
-            onClick={() =>
-              updateData({
-                ...d,
-                services: [...(d.services || []), ""]
-              })
-            }
-            className="flex items-center gap-2 text-sm font-bold text-blue-600"
-          >
-            <Plus size={14} /> Thêm dịch vụ
-          </button>
         </div>
+        <button 
+          onClick={() => updateData({ ...d, services: [...(d.services || []), ""] })} 
+          className="mt-4 flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors"
+        >
+          <Plus size={14} /> Thêm dịch vụ mới
+        </button>
       </Block>
 
-      {/* CTA */}
-      <Block title="CTA & Cam kết" icon={AlignLeft}>
-        <Grid>
-          <Input label="Nút CTA" value={d.cta_label} onChange={(v) => updateData({ ...d, cta_label: v })} />
-          <Input label="Cam kết bảo mật" value={d.privacy_note} onChange={(v) => updateData({ ...d, privacy_note: v })} />
-        </Grid>
+      {/* 5. CTA & BẢO MẬT */}
+      <Block title="Hành động & Pháp lý" icon={MousePointer2}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Input label="Nhãn nút (CTA Label)" value={d.cta_label || ""} onChange={(v) => updateData({ ...d, cta_label: v })} />
+          <Input icon={Lock} label="Ghi chú bảo mật" value={d.privacy_note || ""} onChange={(v) => updateData({ ...d, privacy_note: v })} />
+        </div>
       </Block>
     </div>
   );
 }
 
-/* ---------- UI PARTS ---------- */
-
-const Block = ({ title, icon: Icon, children }: any) => (
-  <div className="bg-white p-10 rounded-[2.5rem] border shadow-sm space-y-6">
-    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 text-blue-600">
-      <Icon size={14} /> {title}
-    </h3>
-    {children}
+/* ---------- UI INTERNAL PARTS ---------- */
+const Block = ({ title, icon: Icon, children }: { title: string; icon: LucideIcon; children: React.ReactNode }) => (
+  <div className="bg-white p-10 rounded-4xl border border-gray-100 shadow-sm space-y-8">
+    <div className="flex items-center gap-3 pb-2 border-b border-gray-50">
+      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Icon size={18} /></div>
+      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">{title}</h3>
+    </div>
+    <div className="space-y-6">{children}</div>
   </div>
 );
 
-const Grid = ({ children }: any) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">{children}</div>
-);
-
-const Input = ({ label, value, onChange, icon: Icon, highlight }: any) => (
-  <div className="space-y-1">
-    <label className="text-[10px] font-black uppercase text-gray-400 flex items-center gap-1">
-      {Icon && <Icon size={10} />} {label}
+const Input = ({ label, value, onChange, icon: Icon, highlight }: { label: string; value: string; onChange: (v: string) => void; icon?: LucideIcon; highlight?: boolean }) => (
+  <div className="space-y-2">
+    <label className="text-[10px] font-black uppercase text-gray-400 flex items-center gap-2 ml-1">
+      {Icon && <Icon size={12} className="text-gray-300" />} {label}
     </label>
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full p-4 rounded-xl outline-none focus:ring-2 ${
-        highlight
-          ? "font-black text-[#E31B23] text-xl italic bg-gray-50 ring-red-100"
-          : "bg-gray-50 ring-blue-100"
+      className={`w-full p-4 rounded-xl outline-none border border-transparent transition-all focus:ring-4 focus:ring-blue-50 focus:bg-white ${
+        highlight ? "font-black text-[#E31B23] text-xl italic bg-gray-50 focus:border-red-100" : "bg-gray-50 font-bold text-[#002D72] focus:border-blue-100"
       }`}
     />
   </div>
 );
 
-const Textarea = ({ label, value, onChange, rows = 3 }: any) => (
-  <div className="space-y-1">
-    <label className="text-[10px] font-black uppercase text-gray-400">{label}</label>
+const Textarea = ({ label, value, onChange, rows = 3 }: { label: string; value: string; onChange: (v: string) => void; rows?: number }) => (
+  <div className="space-y-2">
+    <label className="text-[10px] font-black uppercase text-gray-400 ml-1">{label}</label>
     <textarea
       rows={rows}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full p-4 bg-gray-50 rounded-xl outline-none focus:ring-2 ring-blue-100"
+      className="w-full p-4 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-blue-100 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all font-medium text-gray-600"
     />
   </div>
 );
