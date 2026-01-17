@@ -24,7 +24,7 @@ export type CmsUploadHandler<T> = (
  * Props chuẩn cho mọi Section Config trong Admin
  */
 export interface CmsSectionProps<T> {
-  data?: T;
+  data: T;
   updateData: (data: T) => void;
 
   // Upload media (image / video / file)
@@ -72,13 +72,16 @@ export interface AboutSection {
 ===================================================== */
 
 export interface SKUItem {
+  id: string;
   title: string;
   subtitle: string;
   price: string;
   tag: string;
+  icon: string;
   icon_name: IconName;
   isBestSeller?: boolean;
   features: string[];
+  isHidden: boolean;
 }
 
 export interface SKUSection {

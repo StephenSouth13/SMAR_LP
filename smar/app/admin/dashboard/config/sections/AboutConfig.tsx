@@ -1,26 +1,43 @@
 "use client";
-import { Type, AlignLeft, Info, Trash2, Plus, Zap, Smartphone, ShieldCheck } from "lucide-react";
 
-// Map các icon text sang Component thực tế
-const IconMap: Record<string, any> = {
-  Zap: <Zap className="w-6 h-6 text-yellow-500" />,
-  Smartphone: <Smartphone className="w-6 h-6 text-blue-500" />,
-  ShieldCheck: <ShieldCheck className="w-6 h-6 text-green-500" />,
+import React from "react";
+import { Type, AlignLeft, Info, Trash2, Plus, Zap, Smartphone, ShieldCheck } from "lucide-react";
+import { AboutSection, AboutReason, CmsSectionProps } from "@/types/cms";
+
+// 1. Đồng bộ key viết thường (zap, smartphone, shieldcheck) để khớp với Type hệ thống
+const IconMap: Record<string, React.ReactNode> = {
+  zap: <Zap className="w-6 h-6 text-yellow-500" />,
+  smartphone: <Smartphone className="w-6 h-6 text-blue-500" />,
+  shieldcheck: <ShieldCheck className="w-6 h-6 text-green-500" />,
 };
 
-export default function AboutConfig({ data, updateData }: any) {
+export default function AboutConfig({ data, updateData }: CmsSectionProps<AboutSection>) {
+  
+  const d = data || { title: "", description: "", reasons: [] };
+
   const addReason = () => {
-    const newReasons = [...(data.reasons || []), { icon: "Zap", title: "Lý do mới", desc: "Mô tả lý do..." }];
-    updateData({ ...data, reasons: newReasons });
+    const newReason: AboutReason = { 
+      icon_name: "zap", // Sử dụng viết thường 'zap'
+      title: "Lý do mới", 
+      desc: "Mô tả lý do..." 
+    };
+    const newReasons = [...(d.reasons || []), newReason];
+    updateData({ ...d, reasons: newReasons });
   };
 
   const removeReason = (index: number) => {
-    const newReasons = data.reasons.filter((_: any, i: number) => i !== index);
-    updateData({ ...data, reasons: newReasons });
+    const newReasons = (d.reasons || []).filter((_, i) => i !== index);
+    updateData({ ...d, reasons: newReasons });
+  };
+
+  const updateReason = (index: number, field: keyof AboutReason, value: string) => {
+    const newReasons = [...(d.reasons || [])];
+    newReasons[index] = { ...newReasons[index], [field]: value };
+    updateData({ ...d, reasons: newReasons });
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       {/* Header Config */}
       <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -29,9 +46,9 @@ export default function AboutConfig({ data, updateData }: any) {
               <Type size={14} className="text-blue-500" /> Tiêu đề Section
             </label>
             <input 
-              className="w-full p-4 bg-gray-50 rounded-xl font-bold text-[#004282] border-none outline-none focus:ring-2 ring-blue-100"
-              value={data.title || ""}
-              onChange={(e) => updateData({ ...data, title: e.target.value })}
+              className="w-full p-4 bg-gray-50 rounded-xl font-bold text-[#004282] border-none outline-none focus:ring-2 ring-blue-100 transition-all"
+              value={d.title || ""}
+              onChange={(e) => updateData({ ...d, title: e.target.value })}
             />
           </div>
           <div className="space-y-2">
@@ -39,10 +56,10 @@ export default function AboutConfig({ data, updateData }: any) {
               <AlignLeft size={14} className="text-gray-400" /> Mô tả tổng quát
             </label>
             <textarea 
-              className="w-full p-4 bg-gray-50 rounded-xl text-gray-600 border-none outline-none focus:ring-2 ring-blue-100"
+              className="w-full p-4 bg-gray-50 rounded-xl text-gray-600 border-none outline-none focus:ring-2 ring-blue-100 transition-all"
               rows={2}
-              value={data.description || ""}
-              onChange={(e) => updateData({ ...data, description: e.target.value })}
+              value={d.description || ""}
+              onChange={(e) => updateData({ ...d, description: e.target.value })}
             />
           </div>
         </div>
@@ -50,9 +67,10 @@ export default function AboutConfig({ data, updateData }: any) {
 
       {/* Reasons List Config */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data.reasons?.map((item: any, idx: number) => (
-          <div key={idx} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm relative group">
+        {(d.reasons || []).map((item, idx) => (
+          <div key={idx} className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm relative group">
             <button 
+              type="button"
               onClick={() => removeReason(idx)}
               className="absolute top-4 right-4 text-gray-300 hover:text-red-500 transition-colors"
             >
@@ -62,20 +80,16 @@ export default function AboutConfig({ data, updateData }: any) {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
-                  {IconMap[item.icon] || <Info size={20} />}
+                  {IconMap[item.icon_name] || <Info size={20} />}
                 </div>
                 <select 
-                  className="bg-transparent text-[10px] font-bold uppercase outline-none"
-                  value={item.icon}
-                  onChange={(e) => {
-                    const newR = [...data.reasons];
-                    newR[idx].icon = e.target.value;
-                    updateData({ ...data, reasons: newR });
-                  }}
+                  className="bg-transparent text-[10px] font-bold uppercase outline-none cursor-pointer"
+                  value={item.icon_name}
+                  onChange={(e) => updateReason(idx, 'icon_name', e.target.value)}
                 >
-                  <option value="Zap">Icon Sét (Vàng)</option>
-                  <option value="Smartphone">Icon Điện thoại (Xanh)</option>
-                  <option value="ShieldCheck">Icon Khiên (Xanh lá)</option>
+                  <option value="zap">Icon Sét (Vàng)</option>
+                  <option value="smartphone">Icon Điện thoại (Xanh)</option>
+                  <option value="shieldcheck">Icon Khiên (Xanh lá)</option>
                 </select>
               </div>
 
@@ -83,11 +97,7 @@ export default function AboutConfig({ data, updateData }: any) {
                 placeholder="Tiêu đề thẻ"
                 className="w-full bg-transparent font-bold text-[#002D72] outline-none border-b border-transparent focus:border-blue-100 pb-1"
                 value={item.title}
-                onChange={(e) => {
-                  const newR = [...data.reasons];
-                  newR[idx].title = e.target.value;
-                  updateData({ ...data, reasons: newR });
-                }}
+                onChange={(e) => updateReason(idx, 'title', e.target.value)}
               />
               
               <textarea 
@@ -95,19 +105,16 @@ export default function AboutConfig({ data, updateData }: any) {
                 className="w-full bg-transparent text-sm text-gray-500 outline-none border-none resize-none"
                 rows={3}
                 value={item.desc}
-                onChange={(e) => {
-                  const newR = [...data.reasons];
-                  newR[idx].desc = e.target.value;
-                  updateData({ ...data, reasons: newR });
-                }}
+                onChange={(e) => updateReason(idx, 'desc', e.target.value)}
               />
             </div>
           </div>
         ))}
         
         <button 
+          type="button"
           onClick={addReason}
-          className="h-full min-h-[200px] border-2 border-dashed border-gray-100 rounded-[2rem] flex flex-col items-center justify-center text-gray-300 hover:border-blue-200 hover:text-blue-300 transition-all group"
+          className="h-full min-h-50 border-2 border-dashed border-gray-100 rounded-4xl flex flex-col items-center justify-center text-gray-300 hover:border-blue-200 hover:text-blue-300 transition-all group"
         >
           <Plus size={32} className="group-hover:scale-110 transition-transform" />
           <span className="text-[10px] font-black uppercase mt-2 tracking-widest">Thêm lý do</span>

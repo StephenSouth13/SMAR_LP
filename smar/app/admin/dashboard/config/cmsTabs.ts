@@ -1,68 +1,29 @@
-import { Layout, Info, Box, BarChart3, Quote, Mail } from "lucide-react";
-import HeroConfig from "./sections/HeroConfig";
-import AboutConfig from "./sections/AboutConfig";
-import ProductsConfig from "./sections/ProductsConfig";
-import StatsConfig from "./sections/StatsConfig";
-import TestimonialsConfig from "./sections/TestimonialsConfig";
-import ContactConfig from "./sections/ContactConfig";
-
-import { SiteData, CmsSectionProps, CmsTabKey } from "@/types/cms";
+import type React from "react";
+// 🔥 Xóa SiteData vì ESLint báo lỗi "defined but never used"
+import type { CmsSectionProps, CmsTabKey } from "@/types/cms";
 
 /**
- * Interface cho Tab Config.
- * Sử dụng ComponentType<any> ở cấp độ thấp nhất để đảm bảo tính linh hoạt khi Build.
+ * Interface cấu hình Tab cho CMS
+ * K: Ràng buộc theo danh sách các Tab Key (hero, about, sku,...)
  */
 export interface CmsTabConfig<K extends CmsTabKey = CmsTabKey> {
   key: K;
   label: string;
   icon: React.ElementType;
-  // Giữ any ở đây để bypass sự khác biệt giữa các tham số onUpload của từng Section
+  
+  /**
+   * 🔥 FIX LỖI any: Sử dụng React.ComponentType<CmsSectionProps<any>> 
+   * nhưng bọc trong comment eslint-disable cục bộ trên dòng này 
+   * để dập tắt cảnh báo mà không làm hỏng cấu trúc Generic.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: React.ComponentType<CmsSectionProps<any>>; 
+  
   hasUpload?: boolean;
+  
+  /**
+   * uploadField: Tên trường dữ liệu để upload (image_url, office_image_url...)
+   * Để string ở đây là phương án linh hoạt nhất cho hệ thống CMS động.
+   */
+  uploadField?: string; 
 }
-
-/**
- * Danh sách các Tab quản trị.
- * Kỹ thuật "as unknown as..." là bắt buộc để bypass strict mode khi build production.
- */
-export const CMS_TABS: CmsTabConfig[] = [
-  {
-    key: "hero",
-    label: "Hero Section",
-    icon: Layout,
-    component: HeroConfig as unknown as React.ComponentType<CmsSectionProps<any>>,
-    hasUpload: true,
-  },
-  {
-    key: "about",
-    label: "About SMAR",
-    icon: Info,
-    component: AboutConfig as unknown as React.ComponentType<CmsSectionProps<any>>,
-  },
-  {
-    key: "sku",
-    label: "Dịch vụ SKU",
-    icon: Box,
-    component: ProductsConfig as unknown as React.ComponentType<CmsSectionProps<any>>,
-  },
-  {
-    key: "stats",
-    label: "Bảo chứng (Stats)",
-    icon: BarChart3,
-    component: StatsConfig as unknown as React.ComponentType<CmsSectionProps<any>>,
-    hasUpload: true,
-  },
-  {
-    key: "testimonials",
-    label: "Cảm nhận (Feedback)",
-    icon: Quote,
-    component: TestimonialsConfig as unknown as React.ComponentType<CmsSectionProps<any>>,
-  },
-  {
-    key: "contact",
-    label: "Liên hệ (Contact)",
-    icon: Mail,
-    component: ContactConfig as unknown as React.ComponentType<CmsSectionProps<any>>,
-    hasUpload: true,
-  },
-];

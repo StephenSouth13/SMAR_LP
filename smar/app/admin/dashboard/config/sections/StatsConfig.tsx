@@ -20,18 +20,17 @@ import {
   Plus, 
   Trash2, 
   Type, 
-  Hash, 
   AlignLeft, 
   BarChart3, 
   Eye, 
   EyeOff, 
   Image as ImageIcon,
-  XCircle
+  XCircle,
+  RefreshCw
 } from "lucide-react";
 import Image from "next/image";
 import { ChangeEvent } from "react";
-// Import interfaces chuẩn từ file types
-import { StatItem, StatsSection } from "@/types/cms";
+import { StatItem, StatsSection, CmsSectionProps } from "@/types/cms";
 
 const colorOptions = [
   { name: "Xanh SMAR", value: "text-[#004282]" },
@@ -40,16 +39,17 @@ const colorOptions = [
   { name: "Xanh Lá", value: "text-green-500" },
 ];
 
+/* =====================================================
+    COMPONENT CON: SortableStatItem
+===================== ================================ */
 interface SortableStatItemProps {
   stat: StatItem;
   idx: number;
-  updateStat: (idx: number, field: keyof StatItem, value: string | boolean) => void;
+  // SỬA: Dùng Generic K để đảm bảo Type-safe thay vì dùng any
+  updateStat: <K extends keyof StatItem>(idx: number, field: K, value: StatItem[K]) => void;
   removeStat: (idx: number) => void;
 }
 
-/* =====================
-    COMPONENT CON: SortableStatItem
-===================== */
 function SortableStatItem({ stat, idx, updateStat, removeStat }: SortableStatItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
     id: stat.id 
@@ -59,7 +59,7 @@ function SortableStatItem({ stat, idx, updateStat, removeStat }: SortableStatIte
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 0,
-    position: 'relative' as 'relative',
+    position: 'relative' as const,
   };
 
   return (
@@ -135,25 +135,24 @@ function SortableStatItem({ stat, idx, updateStat, removeStat }: SortableStatIte
   );
 }
 
-interface StatsConfigProps {
-  data: StatsSection;
-  updateData: (data: StatsSection) => void;
-  onUpload: (e: ChangeEvent<HTMLInputElement>) => void;
-  uploading: boolean;
-}
-
-/* =====================
+/* =====================================================
     COMPONENT CHÍNH: StatsConfig
-===================== */
-export default function StatsConfig({ data, updateData, onUpload, uploading }: StatsConfigProps) {
+===================================================== */
+export default function StatsConfig({ 
+  data, 
+  updateData, 
+  onUpload, 
+  uploading = false 
+}: CmsSectionProps<StatsSection>) {
   const sensors = useSensors(useSensor(PointerSensor));
+  const d = data || { title: "", description: "", stats: [], image_url: null };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = (data.stats || []).findIndex((s) => s.id === active.id);
-      const newIndex = (data.stats || []).findIndex((s) => s.id === over.id);
-      updateData({ ...data, stats: arrayMove(data.stats, oldIndex, newIndex) });
+      const oldIndex = (d.stats || []).findIndex((s) => s.id === active.id);
+      const newIndex = (d.stats || []).findIndex((s) => s.id === over.id);
+      updateData({ ...d, stats: arrayMove(d.stats, oldIndex, newIndex) });
     }
   };
 
@@ -165,18 +164,17 @@ export default function StatsConfig({ data, updateData, onUpload, uploading }: S
       color: "text-[#004282]",
       isHidden: false 
     };
-    updateData({ ...data, stats: [...(data.stats || []), newStat] });
+    updateData({ ...d, stats: [...(d.stats || []), newStat] });
   };
 
   const removeImage = () => {
     if (confirm("Bạn có chắc muốn xóa ảnh minh họa này không?")) {
-      updateData({ ...data, image_url: null }); // Xóa ảnh minh họa
+      updateData({ ...d, image_url: null });
     }
   };
 
   return (
     <div className="space-y-10 animate-in fade-in duration-500 pb-20">
-      {/* HEADER: Tiêu đề & Media */}
       <div className="bg-white p-10 rounded-4xl border border-gray-100 shadow-sm space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-7 space-y-6">
@@ -186,8 +184,8 @@ export default function StatsConfig({ data, updateData, onUpload, uploading }: S
               </label>
               <input 
                 className="w-full p-4 bg-gray-50 rounded-xl font-black text-[#004282] uppercase outline-none focus:ring-2 ring-blue-100 italic text-xl"
-                value={data.title || ""}
-                onChange={(e) => updateData({ ...data, title: e.target.value })}
+                value={d.title || ""}
+                onChange={(e) => updateData({ ...d, title: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -197,8 +195,8 @@ export default function StatsConfig({ data, updateData, onUpload, uploading }: S
               <textarea 
                 className="w-full p-4 bg-gray-50 rounded-xl text-gray-600 font-medium outline-none focus:ring-2 ring-blue-100 leading-relaxed"
                 rows={3}
-                value={data.description || ""}
-                onChange={(e) => updateData({ ...data, description: e.target.value })}
+                value={d.description || ""}
+                onChange={(e) => updateData({ ...d, description: e.target.value })}
               />
             </div>
           </div>
@@ -208,7 +206,7 @@ export default function StatsConfig({ data, updateData, onUpload, uploading }: S
               <label className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-2 tracking-widest">
                 <ImageIcon size={14} className="text-purple-500" /> Media minh họa
               </label>
-              {data.image_url && (
+              {d.image_url && (
                 <button 
                   type="button"
                   onClick={removeImage}
@@ -219,17 +217,13 @@ export default function StatsConfig({ data, updateData, onUpload, uploading }: S
               )}
             </div>
             
-            {/* Vùng hiển thị & Upload Media */}
-            <div className="aspect-video bg-gray-50 rounded-4xl overflow-hidden border-2 border-dashed border-gray-100 group relative flex items-center justify-center transition-all hover:border-blue-200">
-              {data.image_url ? (
+            <div className="relative aspect-video bg-gray-50 rounded-4xl overflow-hidden border-2 border-dashed border-gray-100 group flex items-center justify-center transition-all hover:border-blue-200">
+              {d.image_url ? (
                 <Image 
-                  src={data.image_url} 
+                  src={d.image_url} 
                   alt="Stats Preview" 
                   fill 
                   className="object-cover" 
-                  unoptimized 
-                  priority // Tối ưu LCP
-                  loading="eager"
                 />
               ) : (
                 <div className="text-gray-300 flex flex-col items-center gap-2">
@@ -238,16 +232,20 @@ export default function StatsConfig({ data, updateData, onUpload, uploading }: S
                 </div>
               )}
               <label className="absolute inset-0 bg-[#002D72]/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer font-black text-[10px] tracking-widest z-10 gap-2 text-center p-4">
-                <Plus size={24} />
-                {uploading ? "ĐANG TẢI LÊN..." : "NHẤN ĐỂ UPLOAD ẢNH/VIDEO"}
-                <input type="file" className="hidden" onChange={onUpload} accept="image/*,video/*" />
+                {uploading ? <RefreshCw className="animate-spin" size={24} /> : <Plus size={24} />}
+                {uploading ? "ĐANG TẢI LÊN..." : "NHẤN ĐỂ UPLOAD ẢNH"}
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  onChange={(e) => onUpload?.(e, "image_url")} 
+                  accept="image/*" 
+                />
               </label>
             </div>
           </div>
         </div>
       </div>
 
-      {/* DANH SÁCH CHỈ SỐ: DND Kit Sortable */}
       <div className="space-y-6">
         <div className="flex justify-between items-center px-4">
           <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Cấu trúc các chỉ số</h3>
@@ -261,24 +259,22 @@ export default function StatsConfig({ data, updateData, onUpload, uploading }: S
         </div>
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={(data.stats || []).map((s) => s.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={(d.stats || []).map((s) => s.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-4">
-              {data.stats?.map((stat, idx) => (
+              {(d.stats || []).map((stat, idx) => (
                 <SortableStatItem 
                   key={stat.id} 
                   stat={stat} 
                   idx={idx} 
-                  updateStat={(i, f, v) => {
-                    const newS = [...data.stats];
-                    // Fix lỗi any bằng cách ép kiểu an toàn cho keyof StatItem
-                    const targetStat = { ...newS[i] };
-                    (targetStat as any)[f] = v;
-                    newS[i] = targetStat;
-                    updateData({ ...data, stats: newS });
+                  // FIX LỖI: Sử dụng Generic K thay cho any để khớp Type 100%
+                  updateStat={<K extends keyof StatItem>(i: number, f: K, v: StatItem[K]) => {
+                    const newS = [...d.stats];
+                    newS[i] = { ...newS[i], [f]: v };
+                    updateData({ ...d, stats: newS });
                   }}
                   removeStat={(i) => {
                     if (confirm("Bạn có chắc chắn muốn xóa chỉ số này không?")) {
-                      updateData({ ...data, stats: data.stats.filter((_, index) => index !== i) });
+                      updateData({ ...d, stats: d.stats.filter((_, index) => index !== i) });
                     }
                   }}
                 />

@@ -7,19 +7,17 @@ import { useContent } from "@/hooks/useContent";
 import { TestimonialsSection } from "@/types/cms";
 
 /* ---------------------------------- */
-/* ICON MAP – TYPE SAFE */
+/* ICON MAP – ĐỒNG BỘ VỚI CMS TYPE    */
 /* ---------------------------------- */
-type CommitmentIconName = "Award" | "CheckCircle" | "Globe";
-
-const IconMap: Record<CommitmentIconName, LucideIcon> = {
-  Award,
-  CheckCircle,
-  Globe,
+// Sửa lại thành các key viết thường để khớp với Database/Type hệ thống
+const IconMap: Record<string, LucideIcon> = {
+  award: Award,
+  check: CheckCircle,
+  globe: Globe,
 };
 
 export const Testimonials = () => {
-  const { content, loading } =
-    useContent<TestimonialsSection>("testimonials");
+  const { content, loading } = useContent<TestimonialsSection>("testimonials");
 
   if (loading || !content) return null;
 
@@ -28,7 +26,8 @@ export const Testimonials = () => {
   return (
     <section className="pb-24 px-6 md:px-12 lg:px-20 bg-white">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* ---------------- LEFT: MAIN TESTIMONIAL ---------------- */}
+        
+        {/* LEFT: MAIN TESTIMONIAL */}
         <div className="lg:col-span-2 bg-[#F8FAFC] p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden">
           <Quote className="absolute -top-4 -right-4 w-32 h-32 text-blue-100 opacity-20" />
 
@@ -65,16 +64,17 @@ export const Testimonials = () => {
           )}
         </div>
 
-        {/* ---------------- RIGHT: COMMITMENTS ---------------- */}
+        {/* RIGHT: COMMITMENTS */}
         <div className="lg:col-span-3 flex flex-col gap-4 justify-center">
           {content.commitments?.map((com) => {
-            const Icon =
-              IconMap[com.icon_name as CommitmentIconName] ?? Award;
+            // Lấy Icon dựa trên key viết thường
+            const Icon = IconMap[com.icon_name] ?? Award;
 
+            // FIX LỖI: So sánh với các giá trị viết thường (award, check, globe)
             const colorClass =
-              com.icon_name === "Award"
+              com.icon_name === "award"
                 ? "bg-red-50 text-red-500"
-                : com.icon_name === "CheckCircle"
+                : com.icon_name === "check"
                 ? "bg-blue-50 text-blue-500"
                 : "bg-green-50 text-green-500";
 
@@ -105,4 +105,3 @@ export const Testimonials = () => {
     </section>
   );
 };
-  

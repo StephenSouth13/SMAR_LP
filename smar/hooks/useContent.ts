@@ -1,3 +1,4 @@
+//D:\Smar\SMAR_LP\smar\hooks\useContent.ts
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -6,7 +7,7 @@ interface UseContentResult<T> {
   loading: boolean;
 }
 
-export function useContent<T = unknown>(
+export function useContent<T>(
   sectionName: string
 ): UseContentResult<T> {
   const [content, setContent] = useState<T | null>(null);

@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import React from "react";
 import {
   DndContext,
   closestCenter,
@@ -28,11 +30,23 @@ import {
   EyeOff,
   GripVertical,
 } from "lucide-react";
+import { SKUSection, SKUItem, CmsSectionProps } from "@/types/cms";
+import { IconName } from "@/lib/iconRegistry"; // Import IconName chuẩn
 
 /* =====================
     SORTABLE ITEM COMPONENT
 ===================== */
-function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFeature }: any) {
+interface SortableSkuItemProps {
+  sku: SKUItem;
+  idx: number;
+  // Sử dụng Generic K để ép kiểu chính xác giá trị theo key của SKUItem
+  updateSku: <K extends keyof SKUItem>(idx: number, field: K, value: SKUItem[K]) => void;
+  removeSku: (idx: number) => void;
+  addFeature: (idx: number) => void;
+  removeFeature: (skuIdx: number, fIdx: number) => void;
+}
+
+function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFeature }: SortableSkuItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
     id: sku.id || `sku-${idx}` 
   });
@@ -41,7 +55,7 @@ function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFea
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 0,
-    position: 'relative' as 'relative',
+    position: 'relative' as const,
   };
 
   return (
@@ -57,17 +71,11 @@ function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFea
       }`}
     >
       <div className="flex flex-wrap gap-8">
-        {/* DRAG HANDLE */}
-        <div 
-          {...attributes} 
-          {...listeners} 
-          className="absolute left-3 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-2 text-gray-300 hover:text-blue-500 transition-colors"
-        >
+        <div {...attributes} {...listeners} className="absolute left-3 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-2 text-gray-300 hover:text-blue-500 transition-colors">
           <GripVertical size={24} />
         </div>
 
-        {/* LEFT INFO */}
-        <div className="flex-1 min-w-[300px] space-y-6 ml-6">
+        <div className="flex-1 min-w-75 space-y-6 ml-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className={`p-3 rounded-xl ${sku.isBestSeller ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"}`}>
@@ -94,10 +102,7 @@ function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFea
               >
                 {sku.isHidden ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
-              <button 
-                onClick={() => removeSku(idx)}
-                className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all"
-              >
+              <button onClick={() => removeSku(idx)} className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all">
                 <Trash2 size={16} />
               </button>
             </div>
@@ -135,8 +140,7 @@ function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFea
           </label>
         </div>
 
-        {/* RIGHT FEATURES */}
-        <div className="w-full lg:w-[400px] bg-gray-50/50 p-6 rounded-3xl space-y-4">
+        <div className="w-full lg:w-100 bg-gray-50/50 p-6 rounded-3xl space-y-4">
           <div className="flex justify-between items-center">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
               <CheckCircle2 size={14} className="text-green-500" /> Tính năng
@@ -146,7 +150,7 @@ function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFea
             </button>
           </div>
           <div className="space-y-2">
-            {sku.features?.map((feat: string, fIdx: number) => (
+            {(sku.features || []).map((feat, fIdx) => (
               <div key={fIdx} className="flex items-center gap-2">
                 <input
                   className="flex-1 bg-white p-2 rounded-xl text-xs outline-none"
@@ -172,7 +176,7 @@ function SortableSkuItem({ sku, idx, updateSku, removeSku, addFeature, removeFea
 /* =====================
     MAIN CONFIG COMPONENT
 ===================== */
-export default function ProductsConfig({ data, updateData }: any) {
+export default function ProductsConfig({ data, updateData }: CmsSectionProps<SKUSection>) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -181,21 +185,24 @@ export default function ProductsConfig({ data, updateData }: any) {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = data.skus.findIndex((s: any, i: number) => (s.id || `sku-${i}`) === active.id);
-      const newIndex = data.skus.findIndex((s: any, i: number) => (s.id || `sku-${i}`) === over.id);
-      const newSkus = arrayMove(data.skus, oldIndex, newIndex);
+      const oldIndex = (data.skus || []).findIndex((s, i) => (s.id || `sku-${i}`) === active.id);
+      const newIndex = (data.skus || []).findIndex((s, i) => (s.id || `sku-${i}`) === over.id);
+      const newSkus = arrayMove(data.skus || [], oldIndex, newIndex);
       updateData({ ...data, skus: newSkus });
     }
   };
 
   const addSku = () => {
-    const newSku = {
+    const newSku: SKUItem = {
       id: `sku-${Date.now()}`,
       title: "Gói mới",
       subtitle: "Mô tả",
       price: "0 đ",
       tag: "NEW",
+      icon: "box", // Khớp với trường icon: string trong file của bạn
+      icon_name: "box" as IconName, // Khớp với trường icon_name: IconName
       isBestSeller: false,
+      isHidden: false,
       features: ["Tính năng 1"]
     };
     updateData({ ...data, skus: [...(data.skus ?? []), newSku] });
@@ -233,36 +240,36 @@ export default function ProductsConfig({ data, updateData }: any) {
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={data.skus?.map((s: any, i: number) => s.id || `sku-${i}`) || []} strategy={verticalListSortingStrategy}>
+        <SortableContext items={(data.skus || []).map((s, i) => s.id || `sku-${i}`)} strategy={verticalListSortingStrategy}>
           <div className="space-y-6">
-            {data.skus?.map((sku: any, idx: number) => (
+            {(data.skus || []).map((sku, idx) => (
               <SortableSkuItem 
                 key={sku.id || `sku-${idx}`} 
                 sku={sku} 
                 idx={idx} 
-                updateSku={(idx: number, field: string, value: any) => {
-                  const newSkus = [...data.skus];
+                updateSku={<K extends keyof SKUItem>(index: number, field: K, value: SKUItem[K]) => {
+                  const newSkus = [...(data.skus || [])];
                   if (field === "isBestSeller" && value === true) {
-                    newSkus.forEach((s, i) => newSkus[i] = { ...s, isBestSeller: i === idx });
+                    newSkus.forEach((s, i) => newSkus[i] = { ...s, isBestSeller: i === index });
                   } else {
-                    newSkus[idx] = { ...newSkus[idx], [field]: value };
+                    newSkus[index] = { ...newSkus[index], [field]: value };
                   }
                   updateData({ ...data, skus: newSkus });
                 }}
-                removeSku={(idx: number) => {
+                removeSku={(index) => {
                   if (confirm("Xóa gói này?")) {
-                    const newSkus = data.skus.filter((_: any, i: number) => i !== idx);
+                    const newSkus = (data.skus || []).filter((_, i) => i !== index);
                     updateData({ ...data, skus: newSkus });
                   }
                 }}
-                addFeature={(skuIdx: number) => {
-                  const newSkus = [...data.skus];
+                addFeature={(skuIdx) => {
+                  const newSkus = [...(data.skus || [])];
                   newSkus[skuIdx].features = [...(newSkus[skuIdx].features || []), "Tính năng mới"];
                   updateData({ ...data, skus: newSkus });
                 }}
-                removeFeature={(skuIdx: number, fIdx: number) => {
-                  const newSkus = [...data.skus];
-                  newSkus[skuIdx].features = newSkus[skuIdx].features.filter((_: any, i: number) => i !== fIdx);
+                removeFeature={(skuIdx, fIdx) => {
+                  const newSkus = [...(data.skus || [])];
+                  newSkus[skuIdx].features = (newSkus[skuIdx].features || []).filter((_, i) => i !== fIdx);
                   updateData({ ...data, skus: newSkus });
                 }}
               />
@@ -271,8 +278,7 @@ export default function ProductsConfig({ data, updateData }: any) {
         </SortableContext>
       </DndContext>
 
-      {/* COMBO */}
-      <div className="bg-[#E31B23] p-10 rounded-[3rem] text-white space-y-6 shadow-2xl">
+      <div className="bg-[#E31B23] p-10 rounded-4xl text-white space-y-6 shadow-2xl">
         <div className="flex items-center gap-3">
           <Zap className="text-yellow-300" />
           <h3 className="font-black uppercase tracking-tighter text-xl text-white">Combo Bán Nhanh (Cố định ở cuối)</h3>
@@ -281,12 +287,12 @@ export default function ProductsConfig({ data, updateData }: any) {
           <input
             className="bg-white/10 p-4 rounded-xl font-black text-white outline-none border border-white/20"
             value={data.combo?.title ?? ""}
-            onChange={(e) => updateData({ ...data, combo: { ...data.combo, title: e.target.value }})}
+            onChange={(e) => updateData({ ...data, combo: { ...(data.combo || { title: "", price: "" }), title: e.target.value }})}
           />
           <input
             className="bg-white/10 p-4 rounded-xl font-black text-white italic outline-none border border-white/20"
             value={data.combo?.price ?? ""}
-            onChange={(e) => updateData({ ...data, combo: { ...data.combo, price: e.target.value }})}
+            onChange={(e) => updateData({ ...data, combo: { ...(data.combo || { title: "", price: "" }), price: e.target.value }})}
           />
         </div>
       </div>

@@ -5,19 +5,34 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Menu, X, ArrowRight } from "lucide-react"
 
-interface NavbarProps {
-  content?: any
-  settings?: any
+// 1. Định nghĩa các kiểu dữ liệu cụ thể thay vì dùng any
+interface NavLink {
+  label: string;
+  href: string;
 }
 
-export const Navbar = ({ content, settings }: NavbarProps) => {
+interface NavbarContent {
+  brandName1?: string;
+  brandName2?: string;
+  domainText?: string;
+  links?: NavLink[];
+}
+
+interface NavbarProps {
+  content?: NavbarContent;
+  settings?: Record<string, unknown>; // Thay any bằng Record để linh hoạt nhưng an toàn hơn
+}
+
+export const Navbar = ({ content }: NavbarProps) => { // Xóa settings nếu không dùng để hết lỗi unused-vars
   const [isOpen, setIsOpen] = useState(false)
 
   // Dữ liệu mặc định theo nhận diện SMAR
   const brandName1 = content?.brandName1 || "SM"
   const brandName2 = content?.brandName2 || "AR"
   const domainText = content?.domainText || "SALEKITS.VN"
-  const links = content?.links || [
+  
+  // Ép kiểu links để đảm bảo tính an toàn khi map
+  const links: NavLink[] = content?.links || [
     { label: "Về SMAR", href: "#about" },
     { label: "Dịch vụ SKU", href: "#pricing" },
     { label: "Case Study", href: "#blog" },
@@ -46,7 +61,7 @@ export const Navbar = ({ content, settings }: NavbarProps) => {
 
         {/* Desktop Menu Navigation */}
         <div className="hidden md:flex items-center gap-10">
-          {links.map((link: any, idx: number) => (
+          {links.map((link, idx) => ( // TypeScript giờ đây đã biết link là NavLink
             <a 
               key={idx}
               href={link.href} 
@@ -57,7 +72,6 @@ export const Navbar = ({ content, settings }: NavbarProps) => {
             </a>
           ))}
           
-          {/* Sửa lỗi cú pháp tại đây */}
           <a href="#contact" className="inline-block">
             <button className="bg-[#004282] hover:bg-[#002D72] text-white px-7 py-2.5 rounded-full font-bold text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/10 flex items-center gap-2 group">
               Tư vấn ngay
@@ -86,7 +100,7 @@ export const Navbar = ({ content, settings }: NavbarProps) => {
             className="md:hidden bg-white border-t border-gray-50 overflow-hidden shadow-xl"
           >
             <div className="flex flex-col p-6 gap-4">
-              {links.map((link: any, idx: number) => (
+              {links.map((link, idx) => (
                 <a 
                   key={idx}
                   href={link.href} 

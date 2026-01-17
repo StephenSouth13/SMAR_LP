@@ -1,10 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, MapPin, Loader2, CheckCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Loader2, CheckCircle, LucideIcon } from "lucide-react"; // Thêm LucideIcon
 import { useContent } from "@/hooks/useContent";
 import { supabase } from "@/lib/supabase";
 import { ContactSection } from "@/types/cms";
+
+// 1. Định nghĩa Interface cho ContactItem
+interface ContactItemProps {
+  icon: LucideIcon;
+  label: string;
+  value?: string | null;
+}
+
+// 2. Định nghĩa Interface cho FormField
+interface FormFieldProps {
+  label: string;
+  children: React.ReactNode;
+}
 
 export const Contact = () => {
   const { content, loading: dataLoading } = useContent<ContactSection>("contact");
@@ -63,20 +76,22 @@ export const Contact = () => {
             </div>
           ) : (
             <form className="space-y-6" onSubmit={handleSubmit}>
-              <FormField label="Họ và Tên" placeholder="Ví dụ: Nguyễn Văn A">
+              <FormField label="Họ và Tên" >
                 <input 
                   required
                   type="text" 
+                  placeholder="Ví dụ: Nguyễn Văn A"
                   className="w-full p-4 bg-gray-50 rounded-xl outline-none focus:bg-white focus:ring-2 ring-blue-100 transition-all text-sm font-bold"
                   value={formData.full_name}
                   onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                 />
               </FormField>
 
-              <FormField label="Số điện thoại" placeholder="090xxxxxxx">
+              <FormField label="Số điện thoại">
                 <input 
                   required
                   type="tel" 
+                  placeholder="090xxxxxxx"
                   className="w-full p-4 bg-gray-50 rounded-xl outline-none focus:bg-white focus:ring-2 ring-blue-100 transition-all text-sm font-bold"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -119,7 +134,7 @@ export const Contact = () => {
 };
 
 /* --- MINI COMPONENTS --- */
-const ContactItem = ({ icon: Icon, label, value }: any) => (
+const ContactItem = ({ icon: Icon, label, value }: ContactItemProps) => (
   <div className="flex items-center gap-6 group">
     <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-50 text-[#3361E0] group-hover:bg-[#3361E0] group-hover:text-white transition-all shadow-sm">
       <Icon className="w-5 h-5" />
@@ -131,7 +146,7 @@ const ContactItem = ({ icon: Icon, label, value }: any) => (
   </div>
 );
 
-const FormField = ({ label, children }: any) => (
+const FormField = ({ label, children }: FormFieldProps) => (
   <div className="space-y-2">
     <label className="text-[11px] font-black text-gray-400 uppercase ml-1">{label}</label>
     {children}
