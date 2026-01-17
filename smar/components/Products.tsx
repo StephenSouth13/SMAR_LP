@@ -1,145 +1,133 @@
-import { CheckCircle2, User, Smartphone, MessageSquare, Rocket, Target, Zap } from "lucide-react";
+"use client";
 
-const skus = [
-  {
-    title: "Personal Brand Foundation",
-    subtitle: "Khởi tạo Nhân Hiệu Core",
-    price: "18.000.000 đ",
-    tag: "SKU CỬA VÀO",
-    icon: <User className="w-5 h-5 text-blue-600" />,
-    features: [
-      "Audit kênh cá nhân toàn diện",
-      "Concept & Storytelling độc bản",
-      "Bộ Profile 5 ảnh chuyên nghiệp",
-      "Website cá nhân chuẩn SEO",
-    ],
-    buttonClass: "bg-[#004282] text-white",
-  },
-  {
-    title: "Personal Growth",
-    subtitle: "Duy trì Nhân Hiệu Chuyên Gia",
-    price: "Từ 12.000.000 đ/tháng",
-    tag: "RETAINER",
-    icon: <Smartphone className="w-5 h-5 text-blue-600" />,
-    features: [
-      "Quản trị 8-12 bài viết chuyên sâu",
-      "Sản xuất 4-8 video Short/TikTok",
-      "Quản trị tương tác đa kênh",
-      "Cập nhật hình ảnh sự kiện liên tục",
-    ],
-    buttonClass: "bg-[#004282] text-white",
-  },
-  {
-    title: "Product Storytelling",
-    subtitle: "Linh hồn cho Sản phẩm",
-    price: "25.000.000 đ",
-    tag: "BẮT BUỘC TRƯỚC SALEKITS",
-    icon: <MessageSquare className="w-5 h-5 text-blue-600" />,
-    features: [
-      "Nghiên cứu thị trường & USP",
-      "Concept sản phẩm & Slogan",
-      "Nội dung Storytelling website/bao bì",
-      "Bộ ảnh Concept nghệ thuật (10 ảnh)",
-    ],
-    buttonClass: "bg-[#004282] text-white",
-  },
-  {
-    title: "SaleKits Thực Chiến",
-    subtitle: "Bộ công cụ chốt Sales tối thượng",
-    price: "Từ 30.000.000 đ",
-    tag: "XƯƠNG SỐNG 2026",
-    isBestSeller: true,
-    icon: <Rocket className="w-5 h-5 text-red-600" />,
-    features: [
-      "E-catalogue chuyên nghiệp",
-      "Slide Pitching bán hàng",
-      "Landing Page chuyển đổi cao",
-      "Sales Script & FAQ chốt khách",
-      "01 Video giới thiệu sản phẩm",
-    ],
-    buttonClass: "bg-[#E31B23] text-white",
-    cardClass: "border-2 border-red-500 scale-105 z-10 shadow-2xl",
-  },
-  {
-    title: "Product Growth",
-    subtitle: "Hỗ trợ Tăng trưởng Doanh số",
-    price: "Từ 15.000.000 đ/tháng",
-    tag: "RETAINER TĂNG TRƯỞNG",
-    icon: <Target className="w-5 h-5 text-blue-600" />,
-    features: [
-      "Nội dung marketing bán hàng",
-      "Sản xuất Video Short-form hàng tuần",
-      "Lead Gen / Tối ưu quảng cáo",
-      "Chỉ nhận khách đã có SaleKits",
-    ],
-    buttonClass: "bg-[#004282] text-white",
-  },
-];
+import { 
+  CheckCircle2, 
+  User, 
+  Smartphone, 
+  MessageSquare, 
+  Rocket, 
+  Target, 
+  Zap,
+  Box 
+} from "lucide-react";
+import { useContent } from "@/hooks/useContent";
+
+// Map Icon từ Database (dạng chuỗi) sang Component React
+const IconMap: Record<string, React.ReactNode> = {
+  User: <User className="w-5 h-5 text-blue-600" />,
+  Smartphone: <Smartphone className="w-5 h-5 text-blue-600" />,
+  MessageSquare: <MessageSquare className="w-5 h-5 text-blue-600" />,
+  Rocket: <Rocket className="w-5 h-5 text-red-600" />,
+  Target: <Target className="w-5 h-5 text-blue-600" />,
+};
 
 export const Products = () => {
+  // Lấy dữ liệu từ bảng site_content với key 'sku'
+  const { content, loading } = useContent('sku');
+
+  // Hiển thị trạng thái chờ khi dữ liệu đang tải
+  if (loading) return (
+    <div className="py-24 bg-[#004282] text-center text-blue-100 font-black animate-pulse uppercase">
+      Đang tải hệ sinh thái SKU...
+    </div>
+  );
+
+  // Lọc bỏ các gói đã được đánh dấu ẩn (isHidden) từ Admin
+  const activeSkus = (content?.skus || []).filter((sku: any) => !sku.isHidden);
+
   return (
-    <section id ="pricing" className="py-24 px-6 md:px-12 lg:px-20 bg-[#004282]">
+    <section id="pricing" className="py-24 px-6 md:px-12 lg:px-20 bg-[#004282]">
       <div className="max-w-7xl mx-auto">
+        
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-white mb-4 uppercase tracking-tight">
-            Hệ Sinh Thái 5 SKU Cốt Lõi
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight italic">
+            {content?.title || "Hệ Sinh Thái 5 SKU Cốt Lõi"}
           </h2>
-          <p className="text-blue-100 opacity-80 text-lg">
-            Được thiết kế để tăng trưởng theo mô hình 3G (Personal - Product - Business)
+          <p className="text-blue-100 opacity-80 text-lg font-medium">
+            {content?.subtitle || "Được thiết kế để tăng trưởng theo mô hình 3G (Personal - Product - Business)"}
           </p>
         </div>
 
         {/* Grid Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-          {skus.map((sku, index) => (
+          {activeSkus.map((sku: any, index: number) => (
             <div
               key={index}
-              className={`relative bg-white rounded-[2rem] p-8 flex flex-col transition-all duration-300 ${sku.cardClass || "hover:-translate-y-2"}`}
+              className={`relative bg-white rounded-[2.5rem] p-8 flex flex-col transition-all duration-500 border-2 ${
+                sku.isBestSeller 
+                  ? "border-red-500 scale-105 z-10 shadow-[0_30px_60px_rgba(0,0,0,0.2)]" 
+                  : "border-transparent hover:-translate-y-2 hover:shadow-xl"
+              }`}
             >
+              {/* Badge Best Seller */}
               {sku.isBestSeller && (
-                <div className="absolute top-0 right-0 bg-[#E31B23] text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl rounded-tr-[2rem] uppercase tracking-widest">
+                <div className="absolute top-0 right-0 bg-[#E31B23] text-white text-[10px] font-black px-5 py-2 rounded-bl-2xl rounded-tr-[2.5rem] uppercase tracking-widest">
                   Best Seller
                 </div>
               )}
 
+              {/* Icon & Tag */}
               <div className="flex justify-between items-start mb-6">
-                <div className="p-3 bg-gray-50 rounded-xl">{sku.icon}</div>
-                <span className="text-[9px] font-bold text-gray-400 border border-gray-200 px-2 py-1 rounded-md uppercase">
+                <div className={`p-4 rounded-2xl ${sku.isBestSeller ? "bg-red-50" : "bg-gray-50"}`}>
+                  {IconMap[sku.icon] || <Box className="w-5 h-5 text-gray-400" />}
+                </div>
+                <span className="text-[9px] font-black text-gray-400 border border-gray-100 px-3 py-1.5 rounded-lg uppercase tracking-wider">
                   {sku.tag}
                 </span>
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-1">{sku.title}</h3>
-              <p className="text-sm text-gray-500 mb-4">{sku.subtitle}</p>
-              <div className="text-2xl font-black text-[#004282] mb-8">{sku.price}</div>
+              {/* Title & Price */}
+              <div className="space-y-1 mb-2">
+                <h3 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter">
+                  {sku.title}
+                </h3>
+                <p className="text-sm text-gray-400 font-bold">{sku.subtitle}</p>
+              </div>
+              
+              <div className="text-3xl font-black text-[#004282] mb-8 italic tracking-tighter">
+                {sku.price}
+              </div>
 
+              {/* Features List */}
               <ul className="space-y-4 mb-10 flex-grow">
-                {sku.features.map((feat, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-gray-600">
+                {sku.features?.map((feat: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-gray-600 font-medium">
                     <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                     <span>{feat}</span>
                   </li>
                 ))}
               </ul>
 
-              <button className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform active:scale-95 ${sku.buttonClass}`}>
+              {/* CTA Button */}
+              <button className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                sku.isBestSeller 
+                  ? "bg-[#E31B23] text-white shadow-lg shadow-red-200" 
+                  : "bg-[#004282] text-white hover:bg-blue-800 shadow-lg shadow-blue-900/10"
+              }`}>
                 Tư vấn gói này <span className="text-lg">›</span>
               </button>
             </div>
           ))}
 
-          {/* Combo Card (Red Card) */}
-          <div className="bg-[#E31B23] rounded-[2rem] p-8 text-white flex flex-col items-center justify-center text-center shadow-xl hover:-translate-y-2 transition-all">
-            <Zap className="w-12 h-12 mb-6 text-yellow-300" />
-            <h3 className="text-2xl font-black uppercase mb-2 leading-tight">
-              Combo Bán Nhanh
+          {/* Combo Card (Khối đặc biệt luôn nằm cuối) */}
+          <div className="bg-[#E31B23] rounded-[2.5rem] p-10 text-white flex flex-col items-center justify-center text-center shadow-2xl hover:scale-[1.02] transition-all relative overflow-hidden group">
+            <Zap className="w-16 h-16 mb-8 text-yellow-300 animate-pulse relative z-10" />
+            <h3 className="text-3xl font-black uppercase mb-2 leading-tight tracking-tighter italic relative z-10">
+              {content?.combo?.title || "Combo Bán Nhanh"}
             </h3>
-            <p className="text-red-100 text-sm mb-6">Foundation + Storytelling + SaleKits</p>
-            <div className="text-4xl font-black mb-8 italic">Chỉ từ 50M</div>
-            <button className="w-full bg-white text-[#E31B23] py-4 rounded-xl font-bold hover:bg-gray-100 transition-colors">
+            <p className="text-red-100 text-sm mb-8 font-bold opacity-80 uppercase tracking-widest italic z-10">
+              Foundation + Storytelling + SaleKits
+            </p>
+            <div className="text-5xl font-black mb-12 italic tracking-tighter z-10">
+              {content?.combo?.price || "Chỉ từ 50M"}
+            </div>
+            <button className="w-full bg-white text-[#E31B23] py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-50 transition-colors shadow-xl relative z-10">
               Nhận Ưu Đãi Combo
             </button>
+            
+            {/* Decor cho Combo Card */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
           </div>
         </div>
       </div>
