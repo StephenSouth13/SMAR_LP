@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
+  /* Màu nền và chữ cơ bản */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* SMAR Brand Colors - Tối ưu cho UI uy tín */
+  --smar-blue: #002D72;       /* Xanh đậm chuyên nghiệp */
+  --smar-red: #E31B23;        /* Đỏ thương hiệu */
+  --smar-light-bg: #F8FAFC;   /* Xanh xám rất nhạt cho các Section */
+  --smar-text-gray: #4B5563;  /* Xám cho nội dung mô tả */
 }
 
 @theme inline {
@@ -10,17 +17,39 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Đưa biến vào Tailwind Theme */
+  --color-smar-blue: var(--smar-blue);
+  --color-smar-red: var(--smar-red);
+  --color-smar-light: var(--smar-light-bg);
 }
 
+/* Force Light Mode (Vì landing page doanh nghiệp thường ưu tiên giao diện sáng để đồng bộ branding) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', Arial, Helvetica, sans-serif; /* Ưu tiên font Inter cho hiện đại */
+  scroll-behavior: smooth; /* Cuộn mượt khi nhấn vào menu */
+}
+
+/* Các lớp tiện ích bổ sung cho UI uy tín */
+@layer components {
+  .section-container {
+    @apply max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-20;
+  }
+  
+  .btn-primary {
+    @apply bg-smar-blue text-white px-8 py-4 rounded-xl font-bold hover:opacity-90 transition-all active:scale-95 shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply border border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-all;
+  }
 }
