@@ -8,7 +8,6 @@ import {
   MapPin, 
   Image as ImageIcon,
   Video, 
-  Link as LinkIcon, 
   Plus, 
   Trash2, 
   Lock, 
@@ -49,17 +48,11 @@ export default function ContactConfig({
       {/* 2. MEDIA THỰC TẾ (UPLOAD ĐỘNG) */}
       <Block title="Hình ảnh / Video văn phòng" icon={ImageIcon}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* UPLOAD ẢNH */}
           <div className="space-y-3">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Ảnh văn phòng</label>
             <div className="relative aspect-video bg-gray-50 rounded-3xl overflow-hidden border-2 border-dashed border-gray-100 group flex items-center justify-center">
               {d.office_image_url ? (
-                <Image 
-                  src={d.office_image_url} 
-                  alt="Office" 
-                  fill 
-                  className="object-cover transition-transform duration-500 group-hover:scale-110" 
-                />
+                <Image src={d.office_image_url} alt="Office" fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
               ) : (
                 <div className="text-gray-300 flex flex-col items-center gap-2">
                   <ImageIcon size={32} />
@@ -68,20 +61,12 @@ export default function ContactConfig({
               )}
               <label className="absolute inset-0 bg-[#002D72]/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer z-20 gap-2">
                 <PlusCircle size={32} />
-                <span className="font-black text-[10px] tracking-widest uppercase text-center">
-                  {uploading ? "Đang tải..." : "Thay đổi ảnh"}
-                </span>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  onChange={(e) => onUpload?.(e, "office_image_url")} 
-                  accept="image/*" 
-                />
+                <span className="font-black text-[10px] tracking-widest uppercase">{uploading ? "Đang tải..." : "Thay đổi ảnh"}</span>
+                <input type="file" className="hidden" onChange={(e) => onUpload?.(e, "office_image_url")} accept="image/*" />
               </label>
             </div>
           </div>
 
-          {/* UPLOAD VIDEO */}
           <div className="space-y-3">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Video thực tế</label>
             <div className="relative aspect-video bg-gray-50 rounded-3xl overflow-hidden border-2 border-dashed border-gray-100 group flex items-center justify-center">
@@ -95,15 +80,8 @@ export default function ContactConfig({
               )}
               <label className="absolute inset-0 bg-[#002D72]/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer z-20 gap-2">
                 <PlusCircle size={32} />
-                <span className="font-black text-[10px] tracking-widest uppercase text-center">
-                  {uploading ? "Đang tải..." : "Thay đổi video"}
-                </span>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  onChange={(e) => onUpload?.(e, "office_video_url")} 
-                  accept="video/*" 
-                />
+                <span className="font-black text-[10px] tracking-widest uppercase">{uploading ? "Đang tải..." : "Thay đổi video"}</span>
+                <input type="file" className="hidden" onChange={(e) => onUpload?.(e, "office_video_url")} accept="video/*" />
               </label>
             </div>
           </div>
@@ -123,9 +101,9 @@ export default function ContactConfig({
       <Block title="Danh mục dịch vụ (Dropdown Form)" icon={AlignLeft}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {(d.services || []).map((s, i) => (
-            <div key={i} className="flex gap-2 group animate-in fade-in duration-300">
+            <div key={i} className="flex gap-2">
               <input
-                className="flex-1 p-3 bg-gray-50 rounded-xl font-bold text-sm outline-none focus:ring-2 ring-blue-100 focus:bg-white transition-all"
+                className="flex-1 p-3 bg-gray-50 rounded-xl font-bold text-sm outline-none focus:ring-2 ring-blue-100"
                 value={s}
                 onChange={(e) => {
                   const next = [...(d.services || [])];
@@ -133,35 +111,21 @@ export default function ContactConfig({
                   updateData({ ...d, services: next });
                 }}
               />
-              <button 
-                onClick={() => updateData({ ...d, services: d.services?.filter((_, idx) => idx !== i)})} 
-                className="p-3 text-gray-300 hover:text-red-500 transition-colors"
-              >
+              <button onClick={() => updateData({ ...d, services: d.services?.filter((_, idx) => idx !== i)})} className="p-3 text-gray-300 hover:text-red-500">
                 <Trash2 size={18} />
               </button>
             </div>
           ))}
         </div>
-        <button 
-          onClick={() => updateData({ ...d, services: [...(d.services || []), ""] })} 
-          className="mt-4 flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors"
-        >
+        <button onClick={() => updateData({ ...d, services: [...(d.services || []), ""] })} className="mt-4 flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest">
           <Plus size={14} /> Thêm dịch vụ mới
         </button>
-      </Block>
-
-      {/* 5. CTA & BẢO MẬT */}
-      <Block title="Hành động & Pháp lý" icon={MousePointer2}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input label="Nhãn nút (CTA Label)" value={d.cta_label || ""} onChange={(v) => updateData({ ...d, cta_label: v })} />
-          <Input icon={Lock} label="Ghi chú bảo mật" value={d.privacy_note || ""} onChange={(v) => updateData({ ...d, privacy_note: v })} />
-        </div>
       </Block>
     </div>
   );
 }
 
-/* ---------- UI INTERNAL PARTS ---------- */
+/* ---------- UI INTERNAL PARTS (Đã sửa lỗi TypeScript Props) ---------- */
 const Block = ({ title, icon: Icon, children }: { title: string; icon: LucideIcon; children: React.ReactNode }) => (
   <div className="bg-white p-10 rounded-4xl border border-gray-100 shadow-sm space-y-8">
     <div className="flex items-center gap-3 pb-2 border-b border-gray-50">
@@ -180,21 +144,21 @@ const Input = ({ label, value, onChange, icon: Icon, highlight }: { label: strin
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full p-4 rounded-xl outline-none border border-transparent transition-all focus:ring-4 focus:ring-blue-50 focus:bg-white ${
-        highlight ? "font-black text-[#E31B23] text-xl italic bg-gray-50 focus:border-red-100" : "bg-gray-50 font-bold text-[#002D72] focus:border-blue-100"
+      className={`w-full p-4 rounded-xl outline-none border border-transparent transition-all focus:ring-4 focus:ring-blue-50 ${
+        highlight ? "font-black text-[#E31B23] text-xl bg-gray-50 focus:border-red-100" : "bg-gray-50 font-bold text-[#002D72] focus:border-blue-100"
       }`}
     />
   </div>
 );
 
-const Textarea = ({ label, value, onChange, rows = 3 }: { label: string; value: string; onChange: (v: string) => void; rows?: number }) => (
+const Textarea = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
   <div className="space-y-2">
     <label className="text-[10px] font-black uppercase text-gray-400 ml-1">{label}</label>
     <textarea
-      rows={rows}
+      rows={3}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full p-4 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-blue-100 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all font-medium text-gray-600"
+      className="w-full p-4 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-blue-100 focus:ring-4 focus:ring-blue-50 transition-all text-gray-600"
     />
   </div>
 );
