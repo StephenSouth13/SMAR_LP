@@ -7,9 +7,9 @@ import type { AboutSection } from "@/types/cms";
 
 // 2. Định nghĩa IconMap với kiểu dữ liệu chặt chẽ
 const IconMap: Record<string, React.ReactNode> = {
-  Zap: <Zap className="w-6 h-6 text-yellow-500" />,
-  Smartphone: <Smartphone className="w-6 h-6 text-blue-500" />,
-  ShieldCheck: <ShieldCheck className="w-6 h-6 text-green-500" />,
+  zap: <Zap className="w-6 h-6 text-yellow-500" />,
+  smartphone: <Smartphone className="w-6 h-6 text-blue-500" />,
+  shieldCheck: <ShieldCheck className="w-6 h-6 text-green-500" />,
 };
 
 export const About = () => {
