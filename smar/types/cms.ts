@@ -1,7 +1,7 @@
 /**
  * FILE: types/cms.ts
  * Trung tâm định nghĩa kiểu dữ liệu cho toàn bộ CMS
- * Chuẩn enterprise – type-safe – scale được
+ * Chuẩn enterprise – type-safe – hỗ trợ kéo thả & tùy biến Layout
  */
 
 import { ChangeEvent } from "react";
@@ -11,25 +11,26 @@ import type { IconName } from "@/lib/iconRegistry";
    GENERIC CMS SECTION PROPS
 ===================================================== */
 
-/**
- * Upload handler dùng chung cho toàn bộ CMS
- * field được ràng buộc theo keyof Section
- */
 export type CmsUploadHandler<T> = (
   e: ChangeEvent<HTMLInputElement>,
   field: keyof T
 ) => Promise<void>;
 
-/**
- * Props chuẩn cho mọi Section Config trong Admin
- */
 export interface CmsSectionProps<T> {
   data: T;
   updateData: (data: T) => void;
-
-  // Upload media (image / video / file)
   onUpload?: CmsUploadHandler<T>;
   uploading?: boolean;
+}
+
+/* =====================================================
+   LAYOUT SYSTEM (Hệ thống điều phối vị trí)
+===================================================== */
+
+export interface LayoutSection {
+  id: string;        // ID duy nhất (ví dụ: "hero-123")
+  type: "hero" | "about" | "sku" | "stats" | "testimonials" | "contact"| "navbar" | "footer"; 
+  enabled: boolean;  // Bật/Tắt hiển thị
 }
 
 /* =====================================================
@@ -68,7 +69,7 @@ export interface AboutSection {
 }
 
 /* =====================================================
-   SKU SECTION
+   SKU SECTION (Hệ sinh thái sản phẩm)
 ===================================================== */
 
 export interface SKUItem {
@@ -95,7 +96,7 @@ export interface SKUSection {
 }
 
 /* =====================================================
-   STATS SECTION
+   STATS SECTION (Con số bảo chứng)
 ===================================================== */
 
 export interface StatItem {
@@ -139,59 +140,51 @@ export interface TestimonialsSection {
 }
 
 /* =====================================================
-   CONTACT SECTION (NÂNG CAO – MEDIA + MAP)
+   CONTACT SECTION
 ===================================================== */
 
 export interface ContactSection {
   title?: string;
   description?: string;
-
   email?: string;
   phone?: string;
   address?: string;
-
-  // Google Map
   google_map_url?: string;
   google_map_embed?: string;
-
-  // Media
   office_image_url?: string;
   office_video_url?: string;
-
-  // Form
   services?: string[];
   cta_label?: string;
   privacy_note?: string;
 }
 
 /* =====================================================
-    FOOTER SECTION
+   FOOTER SECTION
 ===================================================== */
+
 export interface FooterLink {
   label: string;
   href: string;
 }
 
-/* =====================================================
-    FOOTER SECTION
-===================================================== */
 export interface FooterSection {
-  logo_url?: string;      // Thêm mới
+  logo_url?: string;
   description?: string;
   copyright?: string;
   socials: {
     linkedin?: string;
     facebook?: string;
     website?: string;
-    instagram?: string;   // Thêm mới
-    youtube?: string;     // Thêm mới
+    instagram?: string;
+    youtube?: string;
   };
   sub_links: FooterLink[];
 }
 
 /* =====================================================
-    NAV SECTION
+   NAVBAR SECTION
 ===================================================== */
+
 export interface NavLink {
   label: string;
   href: string;
@@ -204,11 +197,14 @@ export interface NavbarSection {
   ctaText: string;
   links: NavLink[];
 }
+
 /* =====================================================
-   GLOBAL CMS STATE
+   GLOBAL SITE DATA (Bản đồ dữ liệu tổng)
 ===================================================== */
 
 export interface SiteData {
+  layout: LayoutSection[]; // Quyết định thứ tự render trên Landing Page
+  navbar: NavbarSection;
   hero: HeroSection;
   about: AboutSection;
   sku: SKUSection;
@@ -216,10 +212,9 @@ export interface SiteData {
   testimonials: TestimonialsSection;
   contact: ContactSection;
   footer: FooterSection;
-  navbar: NavbarSection;
 }
 
 /**
- * Key dùng cho CMS Tabs / Router
+ * Tab key phục vụ routing trong Admin
  */
 export type CmsTabKey = keyof SiteData;

@@ -6,7 +6,19 @@ import { supabase } from "@/lib/supabase";
 import type { SiteData } from "@/types/cms";
 
 /* -------------------- EMPTY DATA CHUẨN TYPE -------------------- */
+/**
+ * Dữ liệu khởi tạo mặc định. 
+ * layout: Quyết định thứ tự các section nội dung trên Landing Page.
+ */
 const EMPTY_DATA: SiteData = {
+  layout: [
+    { id: "h1", type: "hero", enabled: true },
+    { id: "a1", type: "about", enabled: true },
+    { id: "s1", type: "sku", enabled: true },
+    { id: "st1", type: "stats", enabled: true },
+    { id: "t1", type: "testimonials", enabled: true },
+    { id: "c1", type: "contact", enabled: true },
+  ],
   hero: { badge: "", title: "", description: "", image_url: "", revenue_target: "", buttons: [] },
   about: { title: "", description: "", reasons: [] },
   sku: { title: "", subtitle: "", skus: [], combo: { title: "", price: "" } },
@@ -64,6 +76,7 @@ export const useCmsLogic = () => {
       for (const row of records || []) {
         const key = row.section_name as keyof SiteData;
         if (key in merged) {
+          // Ép kiểu qua any để linh hoạt gán dữ liệu JSON từ DB
           (merged as any)[key] = row.content;
         }
       }
@@ -78,6 +91,11 @@ export const useCmsLogic = () => {
   }, []);
 
   /* -------------------- SAVE 1 SECTION -------------------- */
+  /**
+   * Lưu một section cụ thể vào database. 
+   * @param section Tên section cần lưu (ví dụ: 'hero', 'layout')
+   * @param customData Dữ liệu tùy chỉnh nếu không muốn lấy từ state hiện tại
+   */
   const handleSave = async <K extends keyof SiteData>(section: K, customData?: any) => {
     setSaving(true);
     setMsg("⏳ Đang lưu...");
@@ -103,6 +121,9 @@ export const useCmsLogic = () => {
   };
 
   /* -------------------- UPLOAD MEDIA (GENERIC) -------------------- */
+  /**
+   * Tải ảnh/video lên Storage và cập nhật trực tiếp vào Section tương ứng
+   */
   const handleUpload = async <
     K extends keyof SiteData,
     F extends keyof SiteData[K]
@@ -117,32 +138,31 @@ export const useCmsLogic = () => {
     setUploading(true);
     setMsg("⏳ Đang tải media...");
 
-    // 1. Tạo tên file duy nhất trong storage
     const fileName = `${section}_${String(field)}_${Date.now()}`;
 
     try {
-      // 2. Upload lên Bucket smar-assets
+      // 1. Upload file lên bucket 'smar-assets'
       const { error: uploadError } = await supabase.storage
         .from("smar-assets")
         .upload(fileName, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      // 3. Lấy URL công khai
+      // 2. Lấy URL công khai của file vừa upload
       const { data: urlData } = supabase.storage
         .from("smar-assets")
         .getPublicUrl(fileName);
 
       const publicUrl = urlData.publicUrl;
 
-      // 4. Cập nhật Local State & Database đồng thời
+      // 3. Cập nhật state cục bộ và tự động trigger lưu vào DB
       setData((prev) => {
         const updatedSection = {
           ...prev[section],
           [field]: publicUrl
         };
         
-        // Tự động trigger lưu vào DB sau khi có URL mới
+        // Gọi lưu ngay để đảm bảo DB đồng bộ với ảnh mới
         handleSave(section, updatedSection);
 
         return {
@@ -151,10 +171,10 @@ export const useCmsLogic = () => {
         };
       });
 
-      setMsg("✅ Đã cập nhật media thành công");
+      setMsg("✅ Media đã cập nhật");
     } catch (err: any) {
       console.error("❌ Upload error:", err.message);
-      setMsg("❌ Upload thất bại: " + err.message);
+      setMsg("❌ Lỗi tải lên: " + err.message);
     } finally {
       setUploading(false);
       setTimeout(() => setMsg(""), 3000);

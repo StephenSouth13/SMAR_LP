@@ -10,8 +10,6 @@ import {
   Video, 
   Plus, 
   Trash2, 
-  Lock, 
-  MousePointer2, 
   LucideIcon, 
   PlusCircle,
   AlignLeft

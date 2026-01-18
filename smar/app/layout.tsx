@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+// Xóa import Navbar và Footer ở đây vì page.tsx đã tự gọi rồi
 
 const inter = Inter({ subsets: ["latin", "vietnamese"] });
 
@@ -19,9 +18,8 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={inter.className}>
-        <Navbar />
+        {/* CHỈ để lại children ở đây */}
         {children}
-        <Footer />
       </body>
     </html>
   );

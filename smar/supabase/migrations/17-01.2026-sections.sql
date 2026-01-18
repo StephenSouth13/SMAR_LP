@@ -209,3 +209,28 @@ ON CONFLICT (section_name) DO NOTHING;
 INSERT INTO site_content (section_name, content) 
 VALUES ('navbar', '{"brandName1":"SM","brandName2":"AR","domainText":"SALEKITS.VN","ctaText":"Tư vấn ngay","links":[{"label":"Về SMAR","href":"#about"},{"label":"Dịch vụ SKU","href":"#pricing"},{"label":"Case Study","href":"#blog"}]}')
 ON CONFLICT (section_name) DO NOTHING;
+INSERT INTO site_content (section_name, content)
+VALUES ('layout', '[{"id":"h1","type":"hero","enabled":true},{"id":"a1","type":"about","enabled":true},{"id":"s1","type":"sku","enabled":true},{"id":"st1","type":"stats","enabled":true},{"id":"t1","type":"testimonials","enabled":true},{"id":"c1","type":"contact","enabled":true}]')
+ON CONFLICT (section_name) DO NOTHING;
+-- Bước 1: Xóa bỏ dòng layout cũ nếu nó đang bị sai định dạng (không phải mảng)
+DELETE FROM site_content 
+WHERE section_name = 'layout' 
+AND jsonb_typeof(content) <> 'array';
+
+-- Bước 2: Chèn bộ khung Layout chuẩn cho SMAR
+-- Lệnh này sẽ chỉ chèn nếu chưa có dòng 'layout' nào trong bảng
+INSERT INTO site_content (section_name, content)
+VALUES (
+  'layout', 
+  '[
+    {"id": "h1", "type": "hero", "enabled": true},
+    {"id": "a1", "type": "about", "enabled": true},
+    {"id": "p1", "type": "sku", "enabled": true},
+    {"id": "s1", "type": "stats", "enabled": true},
+    {"id": "t1", "type": "testimonials", "enabled": true},
+    {"id": "c1", "type": "contact", "enabled": true}
+  ]'::jsonb
+)
+ON CONFLICT (section_name) 
+DO UPDATE SET content = EXCLUDED.content 
+WHERE jsonb_typeof(site_content.content) <> 'array' OR jsonb_array_length(site_content.content) = 0;

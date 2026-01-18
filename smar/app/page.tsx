@@ -1,29 +1,70 @@
+//D:\Smar\SMAR_LP\smar\app\page.tsx
+"use client";
+
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Products } from "@/components/Products";
 import { Stats } from "@/components/Stats";
 import { Testimonials } from "@/components/Testimonials";
 import { Contact } from "@/components/Contact";
-export const revalidate = 0;
+import { Navbar } from "@/components/Navbar"; 
+import { Footer } from "@/components/Footer"; 
+
+import { useContent } from "@/hooks/useContent";
+import { SiteData } from "@/types/cms";
+
+// ... các import giữ nguyên
+
 export default function Home() {
+  const { content, loading } = useContent<SiteData>();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const layout = Array.isArray(content?.layout) ? content.layout : [];
+
   return (
     <main className="min-h-screen overflow-x-hidden">
-      {/* 1. Hero Section */}
-      <Hero />
+      {/* Navbar luôn ở ĐÂY - cố định trên cùng */}
+      <Navbar />
 
-      {/* 2. About Section - Tại sao chọn SMAR */}
-      <About />
+      {layout.length > 0 ? (
+        layout.map((section) => {
+          // Ép kiểu string để chặn tuyệt đối
+          const sType = section.type as string;
+          
+          // ĐIỀU KIỆN CHẶN: Nếu ẩn HOẶC là navbar/footer thì biến mất khỏi vòng lặp
+          if (!section.enabled || sType === "navbar" || sType === "footer") {
+            return null;
+          }
 
+          switch (section.type) {
+            case "hero": return <Hero key={section.id} />;
+            case "about": return <About key={section.id} />;
+            case "sku": return <Products key={section.id} />;
+            case "stats": return <Stats key={section.id} />;
+            case "testimonials": return <Testimonials key={section.id} />;
+            case "contact": return <Contact key={section.id} />;
+            default: return null;
+          }
+        })
+      ) : (
+        /* Dự phòng: Nếu database rỗng, hiện thứ tự mặc định */
+        <>
+          <Hero />
+          <About />
+          <Products />
+          <Stats />
+        </>
+      )}
 
-      {/* 3. Products Section - Hệ sinh thái 5 SKU */}
-      <Products />
-    {/* 4. Stats Section - Bảo chứng thành công (15+ dự án/tháng) */}
-      <Stats />
-      {/* 5. Testimonials Section - Case Study AMA Vũng Tàu */}
-      <Testimonials />
-
-      {/* 6. Contact Section - Form đăng ký và thông tin liên hệ */}
-      <Contact />
+      {/* Footer luôn ở ĐÂY - cố định dưới cùng */}
+      <Footer />
     </main>
   );
 }
