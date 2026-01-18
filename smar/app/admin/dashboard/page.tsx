@@ -1,3 +1,4 @@
+//D:\Smar\SMAR_LP\smar\app\admin\dashboard\page.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
