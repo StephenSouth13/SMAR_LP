@@ -180,3 +180,32 @@ VALUES (
 )
 ON CONFLICT (section_name)
 DO UPDATE SET content = EXCLUDED.content;
+-- Cho phép upload ảnh vào bucket smar-assets
+CREATE POLICY "Cho phép Admin upload" 
+ON storage.objects FOR INSERT 
+TO authenticated 
+WITH CHECK (bucket_id = 'smar-assets');
+
+-- Cho phép xem ảnh công khai
+CREATE POLICY "Cho phép xem ảnh công khai" 
+ON storage.objects FOR SELECT 
+TO public 
+USING (bucket_id = 'smar-assets');
+
+INSERT INTO site_content (section_name, content)
+VALUES ('footer', '{
+  "logo_url": "",
+  "description": "Strategic Marketing & Research Agency",
+  "socials": {
+    "linkedin": "",
+    "facebook": "",
+    "website": "",
+    "instagram": "",
+    "youtube": ""
+  },
+  "sub_links": []
+}')
+ON CONFLICT (section_name) DO NOTHING;
+INSERT INTO site_content (section_name, content) 
+VALUES ('navbar', '{"brandName1":"SM","brandName2":"AR","domainText":"SALEKITS.VN","ctaText":"Tư vấn ngay","links":[{"label":"Về SMAR","href":"#about"},{"label":"Dịch vụ SKU","href":"#pricing"},{"label":"Case Study","href":"#blog"}]}')
+ON CONFLICT (section_name) DO NOTHING;

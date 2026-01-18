@@ -165,6 +165,46 @@ export interface ContactSection {
 }
 
 /* =====================================================
+    FOOTER SECTION
+===================================================== */
+export interface FooterLink {
+  label: string;
+  href: string;
+}
+
+/* =====================================================
+    FOOTER SECTION
+===================================================== */
+export interface FooterSection {
+  logo_url?: string;      // Thêm mới
+  description?: string;
+  copyright?: string;
+  socials: {
+    linkedin?: string;
+    facebook?: string;
+    website?: string;
+    instagram?: string;   // Thêm mới
+    youtube?: string;     // Thêm mới
+  };
+  sub_links: FooterLink[];
+}
+
+/* =====================================================
+    NAV SECTION
+===================================================== */
+export interface NavLink {
+  label: string;
+  href: string;
+}
+
+export interface NavbarSection {
+  brandName1: string;
+  brandName2: string;
+  domainText: string;
+  ctaText: string;
+  links: NavLink[];
+}
+/* =====================================================
    GLOBAL CMS STATE
 ===================================================== */
 
@@ -175,6 +215,8 @@ export interface SiteData {
   stats: StatsSection;
   testimonials: TestimonialsSection;
   contact: ContactSection;
+  footer: FooterSection;
+  navbar: NavbarSection;
 }
 
 /**

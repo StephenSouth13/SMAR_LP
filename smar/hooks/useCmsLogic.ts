@@ -17,6 +17,29 @@ const EMPTY_DATA: SiteData = {
     google_map_url: "", google_map_embed: "", office_image_url: "",
     office_video_url: "", services: [], cta_label: "", privacy_note: "",
   },
+  navbar: {
+    brandName1: "SM",
+    brandName2: "AR",
+    domainText: "SALEKITS.VN",
+    ctaText: "Tư vấn ngay",
+    links: [
+      { label: "Về SMAR", href: "#about" },
+      { label: "Dịch vụ SKU", href: "#pricing" },
+      { label: "Case Study", href: "#blog" },
+    ]
+  },
+  footer: {
+    logo_url: "",
+    description: "",
+    socials: {
+      linkedin: "",
+      facebook: "",
+      website: "",
+      instagram: "",
+      youtube: ""
+    },
+    sub_links: []
+  }
 };
 
 export const useCmsLogic = () => {
@@ -41,7 +64,6 @@ export const useCmsLogic = () => {
       for (const row of records || []) {
         const key = row.section_name as keyof SiteData;
         if (key in merged) {
-          // FIX LỖI 2322: Ép kiểu qua any để tránh TS bắt phải khớp toàn bộ union types
           (merged as any)[key] = row.content;
         }
       }
@@ -56,7 +78,7 @@ export const useCmsLogic = () => {
   }, []);
 
   /* -------------------- SAVE 1 SECTION -------------------- */
-  const handleSave = async <K extends keyof SiteData>(section: K) => {
+  const handleSave = async <K extends keyof SiteData>(section: K, customData?: any) => {
     setSaving(true);
     setMsg("⏳ Đang lưu...");
 
@@ -65,7 +87,7 @@ export const useCmsLogic = () => {
       .upsert(
         {
           section_name: section,
-          content: data[section],
+          content: customData || data[section],
         },
         { onConflict: "section_name" }
       );
@@ -95,33 +117,48 @@ export const useCmsLogic = () => {
     setUploading(true);
     setMsg("⏳ Đang tải media...");
 
+    // 1. Tạo tên file duy nhất trong storage
     const fileName = `${section}_${String(field)}_${Date.now()}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("smar-assets")
-      .upload(fileName, file, { upsert: true });
+    try {
+      // 2. Upload lên Bucket smar-assets
+      const { error: uploadError } = await supabase.storage
+        .from("smar-assets")
+        .upload(fileName, file, { upsert: true });
 
-    if (uploadError) {
-      setMsg("❌ Upload lỗi: " + uploadError.message);
+      if (uploadError) throw uploadError;
+
+      // 3. Lấy URL công khai
+      const { data: urlData } = supabase.storage
+        .from("smar-assets")
+        .getPublicUrl(fileName);
+
+      const publicUrl = urlData.publicUrl;
+
+      // 4. Cập nhật Local State & Database đồng thời
+      setData((prev) => {
+        const updatedSection = {
+          ...prev[section],
+          [field]: publicUrl
+        };
+        
+        // Tự động trigger lưu vào DB sau khi có URL mới
+        handleSave(section, updatedSection);
+
+        return {
+          ...prev,
+          [section]: updatedSection,
+        };
+      });
+
+      setMsg("✅ Đã cập nhật media thành công");
+    } catch (err: any) {
+      console.error("❌ Upload error:", err.message);
+      setMsg("❌ Upload thất bại: " + err.message);
+    } finally {
       setUploading(false);
-      return;
+      setTimeout(() => setMsg(""), 3000);
     }
-
-    const { data: urlData } = supabase.storage
-      .from("smar-assets")
-      .getPublicUrl(fileName);
-
-    setData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: urlData.publicUrl,
-      },
-    }));
-
-    setMsg("✅ Media đã cập nhật");
-    setUploading(false);
-    setTimeout(() => setMsg(""), 3000);
   };
 
   useEffect(() => {
