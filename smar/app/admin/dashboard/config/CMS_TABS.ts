@@ -1,3 +1,4 @@
+//D:\Smar\SMAR_LP\smar\app\admin\dashboard\config\CMS_TABS.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { 
   Layout, 

@@ -1,3 +1,4 @@
+//D:\Smar\SMAR_LP\smar\app\admin\dashboard\config\cmsTabs.ts
 import type React from "react";
 import type { CmsSectionProps, CmsTabKey } from "@/types/cms";
 

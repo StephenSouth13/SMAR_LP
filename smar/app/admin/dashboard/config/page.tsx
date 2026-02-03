@@ -1,3 +1,4 @@
+//D:\Smar\SMAR_LP\smar\app\admin\dashboard\config\page.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 

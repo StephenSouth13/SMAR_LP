@@ -1,3 +1,4 @@
+//D:\Smar\SMAR_LP\smar\hooks\useContent.ts
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
